@@ -1,6 +1,11 @@
 import React, { useState, useEffect } from "react";
 import styles from './SearchBar.module.css';
 export default function SearchBar() {
+
+    const handleClick = (event) => {
+        const searchValue = event.target.value;
+        return searchValue
+    }
     
     return (
         <>

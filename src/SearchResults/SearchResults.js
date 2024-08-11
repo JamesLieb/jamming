@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from "react";
 import styles from './SearchResults.module.css';
-export default function SearchResults() {
+import Track from "../Track/Track";
+import TrackList from "../Tracklist/Tracklist";
+export default function SearchResults(props) {
+
     return (
         <>
         <div className={styles.container}>

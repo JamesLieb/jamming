@@ -1,0 +1,34 @@
+.App {
+    display: block;
+    
+}
+
+.AppHeader {
+    display: flex;
+    flex-flow: column wrap;
+    justify-content: center;
+    align-content: center;
+    align-items: center;
+}
+
+.search {
+    background: black;
+    width:92%;
+}
+
+.form {
+    display: flex;
+    flex-flow:column;
+    justify-content: center;
+    align-content: center;
+    margin: 10px;
+}
+
+.tracklistWrapper {
+    display: flex;
+    flex-flow:row wrap;
+    align-content: center;
+    margin: 0;
+    padding:0;
+    
+}

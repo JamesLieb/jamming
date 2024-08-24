@@ -10,8 +10,7 @@ export default function PlayList(props) {
 
     return (
         <>
-            <div className={styles.container}>
-            <div className={styles.childcontainer}>
+            
                 <div className={styles.newdiv}>
                     <div className={styles.playlist}>
                     <button className={styles.saveto} onClick={props.onSave}><span>Save to Spotify</span></button>
@@ -21,8 +20,7 @@ export default function PlayList(props) {
                         
                 </div>
                     
-            </div>
-            </div>
+            
             
         </>
     )

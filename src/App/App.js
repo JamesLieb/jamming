@@ -152,7 +152,6 @@ const savePlaylist = useCallback(() => {
             </header>
         <div className={styles.tracklistWrapper}>
         <TrackList tracks={tracks} onAdd={addTrack} />
-        </div>
         <Playlist
         playlistName={playlistName}
         playlistTracks={playlistTracks}
@@ -160,6 +159,8 @@ const savePlaylist = useCallback(() => {
         onRemove={removeTrack}
         onSave={savePlaylist} 
         />
+        </div>
+       
         </div>
     );
 }

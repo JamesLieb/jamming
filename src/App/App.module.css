@@ -1,6 +1,7 @@
 .App {
     display: block;
     
+    
 }
 
 .AppHeader {
@@ -33,4 +34,9 @@
     justify-content: space-between;
    
     
+}
+
+.log {
+    color:aliceblue;
+    background-color: rgba(197, 8, 181, 0.705);
 }

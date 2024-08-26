@@ -9,31 +9,98 @@ import styles from './App.module.css';
 
 const CLIENT_ID = 'f04c9ec0fb904dd2a1f53ca2a1d30ea6'
 const REDIRECT_URI = "http://localhost:3000"
-const AUTH_ENDPOINT = "https://accounts.spotify.com/authorize"
-const RESPONSE_TYPE = "token"
+
 
 function App() {
   const [token, setToken] = useState("");
   const [searchKey, setSearchKey] = useState("");
-  const [artists, setArtists] = useState([]);
   const [tracks, setTracks] = useState([]);
   const [playlistName, setPlaylistName] = useState('Playlist');
   const [playlistTracks, setPlaylistTracks] = useState([]);
+ 
+
+
+    const params = new URLSearchParams(window.location.search);
+    const code = params.get("code");
+
+
+
+
 
   useEffect(() => {
-    const hash = window.location.hash
-    let token = window.localStorage.getItem("token")
 
-    if (!token && hash) {
-        token = hash.substring(1).split("&").find(elem => elem.startsWith("access_token")).split("=")[1]
-
-        window.location.hash = ""
-        window.localStorage.setItem("token", token)
+    if (!code) {
+        redirectToAuthCodeFlow(CLIENT_ID);
+    } else {
+         getAccessToken(CLIENT_ID, code);
+        
+        
     }
 
-    setToken(token)
-
 }, []);
+
+ 
+
+ async function redirectToAuthCodeFlow(clientId) {
+    const verifier = generateCodeVerifier(128);
+    const challenge = await generateCodeChallenge(verifier);
+
+    localStorage.setItem("verifier", verifier);
+
+    const params = new URLSearchParams();
+    params.append("client_id", clientId);
+    params.append("response_type", "code");
+    params.append("redirect_uri", `${REDIRECT_URI}`);
+    params.append("scope", "user-read-private user-read-email playlist-modify-public playlist-modify-private");
+    params.append("code_challenge_method", "S256");
+    params.append("code_challenge", challenge);
+
+    document.location = `https://accounts.spotify.com/authorize?${params.toString()}`;
+}
+
+function generateCodeVerifier(length) {
+    let text = '';
+    let possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+
+    for (let i = 0; i < length; i++) {
+        text += possible.charAt(Math.floor(Math.random() * possible.length));
+    }
+    return text;
+}
+
+async function generateCodeChallenge(codeVerifier) {
+    const data = new TextEncoder().encode(codeVerifier);
+    const digest = await window.crypto.subtle.digest('SHA-256', data);
+    return btoa(String.fromCharCode.apply(null, [...new Uint8Array(digest)]))
+        .replace(/\+/g, '-')
+        .replace(/\//g, '_')
+        .replace(/=+$/, '');
+}
+
+
+ async function getAccessToken(clientId, code) {
+    const verifier = localStorage.getItem("verifier");
+
+    const params = new URLSearchParams();
+    params.append("client_id", clientId);
+    params.append("grant_type", "authorization_code");
+    params.append("code", code);
+    params.append("redirect_uri", `${REDIRECT_URI}`);
+    params.append("code_verifier", verifier);
+
+    const result = await fetch("https://accounts.spotify.com/api/token", {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: params
+    });
+
+    const { access_token } = await result.json();
+    setToken(access_token)
+    window.localStorage.setItem("token", token);
+    console.log(token);
+    return
+}
+  
 
   const logout = () => {
   setToken("")
@@ -76,53 +143,35 @@ const removeTrack = useCallback((track) => {
 const updatePlaylistName = useCallback((name) =>
 setPlaylistName(name), []);
 
+
+
 const savePlaylistRequest = async (name, trackUris) => {
-    const header= {
-        Authorization: `Bearer ${token}`
-    };
-    if (!name || trackUris.length) {
+
+    if (!name || !trackUris.length) {
         return;
     }
-
-    const user_Id = await axios.get('https://api.spotify.com/v1/me',
-        {headers: header}
-    );
-
-    const id = user_Id.id;
-
-
-
-    const playlist = await axios.post(`https://api.spotify.com/v1/users/${id}/playlists`,
-        {
-            headers: {
-                Authorization: `Bearer ${token}`,
-                'Content-Type': 'application/json',
-            },
-            
-
-            data: {
-                name: playlistName,
-            }
-        },
-        
-    );
-
-    const playlist_Id = playlist.id;
-
-    const updatePlaylist = await axios.post(`https://api.spotify.com/v1/playlists/${playlist_Id}/tracks`,
-        {
-            headers: {
-                Authorization: `Bearer ${token}`,
-                'Content-Type': 'application/json',
-            },
-            data: {
-                uris: trackUris,
-            }
-        }
-    );
-
     
-    return updatePlaylist
+    const headers = { Authorization: `Bearer ${token}` };
+    let userId;
+
+    return fetch('https://api.spotify.com/v1/me', {headers: headers}
+    ).then(response => response.json()
+    ).then(jsonResponse => {
+      userId = jsonResponse.id;
+      return fetch(`https://api.spotify.com/v1/users/${userId}/playlists`, {
+        headers: headers,
+        method: 'POST',
+        body: JSON.stringify({name: name})
+      }).then(response => response.json()
+      ).then(jsonResponse => {
+        const playlistId = jsonResponse.id;
+        return fetch(`https://api.spotify.com/v1/users/${userId}/playlists/${playlistId}/tracks`, {
+          headers: headers,
+          method: 'POST',
+          body: JSON.stringify({uris: trackUris})
+        });
+      });
+    });
 
 };
 
@@ -142,12 +191,12 @@ const savePlaylist = useCallback(() => {
             <header className={styles.AppHeader}>
             <h1>Jammming</h1>
                 {!token ?
-                    <a href={`${AUTH_ENDPOINT}?client_id=${CLIENT_ID}&redirect_uri=${REDIRECT_URI}&response_type=${RESPONSE_TYPE}`}>Login
+                    <a className={styles.log} href={"."}>Login
                         to Spotify</a>
-                    : <button onClick={logout}>Logout</button>}
+                    : <button className={styles.log} onClick={logout}>Logout</button>}
                 <form className={styles.form} onSubmit={searchTracks}>
                   <input className={styles.search} type="text" onChange={e => setSearchKey(e.target.value)}/>
-                  <button type={"submit"}>Search</button>
+                  <button className={styles.log} type={"submit"}>Search</button>
                 </form>
             </header>
         <div className={styles.tracklistWrapper}>

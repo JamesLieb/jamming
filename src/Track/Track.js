@@ -32,6 +32,7 @@ export default function Track(props) {
             <div className={styles.info}>
                 <h3 className={styles.trackName}>{props.track.name}</h3>
                 <p className={styles.trackInfo}>{props.track.artists.map((artist) => ` - ${artist.name}`)} | {props.track.album.name}</p>
+                <audio controls className={styles.preview} src={props.track.preview_url}></audio>
                 
             </div>
             <div className={styles.buttonWrapper}>

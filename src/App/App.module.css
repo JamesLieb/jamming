@@ -31,7 +31,7 @@
     display: flex;
     flex-flow:row ;
     align-content: center;
-    justify-content: space-between;
+    justify-content: space-evenly;
    
     
 }

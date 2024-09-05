@@ -17,6 +17,7 @@ function App() {
   const [tracks, setTracks] = useState([]);
   const [playlistName, setPlaylistName] = useState('Playlist');
   const [playlistTracks, setPlaylistTracks] = useState([]);
+  const [listIndices, setListIndices] = useState({});
  
 
 
@@ -128,17 +129,28 @@ const searchTracks = async (e) => {
 const addTrack = useCallback(
     (track) => {
       if (playlistTracks.some((savedTrack) => savedTrack.id === track.id))
-        return;
-
+        {
+          return
+        };
+      let index = tracks.indexOf(track);
+      console.log(index);
+      setListIndices( {...listIndices, track: index});
+      console.log(listIndices);
+      let newTracks = tracks.toSpliced(index, 1);
+      setTracks(newTracks);
       setPlaylistTracks((prevTracks) => [...prevTracks, track]);
     },
-    [playlistTracks]
+    [playlistTracks, tracks]
   );
 
 const removeTrack = useCallback((track) => {
     setPlaylistTracks((prevTracks) => 
-    prevTracks.filter((currentTrack) => currentTrack.id !== track.id))
-},[]);
+    prevTracks.filter((currentTrack) => currentTrack.id !== track.id)); 
+    let newTracks = tracks.toSpliced(listIndices.track,0,track);
+    let newObj  = delete listIndices.track;
+    setListIndices(newObj);
+    setTracks(newTracks);
+},[tracks]);
 
 const updatePlaylistName = useCallback((name) =>
 setPlaylistName(name), []);

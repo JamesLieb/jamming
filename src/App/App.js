@@ -31,7 +31,7 @@ useEffect(() => {
     redirectToAuthCodeFlow(CLIENT_ID);
 } 
 else {
-  if (token.length > 1) {
+  if (token!=='') {
     return
   }
   else {
@@ -39,7 +39,7 @@ else {
   }
   
 }
-}, [code, redirectToAuthCodeFlow, getAccessToken])
+}, [code, redirectToAuthCodeFlow, getAccessToken, token])
 
  
 

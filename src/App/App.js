@@ -22,42 +22,23 @@ function App() {
 
 
     const params = new URLSearchParams(window.location.search);
-    const code = params.get("code");
+    let code = params.get("code");
 
 
 
-
-
-  useEffect(() => {
-
-    if (!code) {
-        redirectToAuthCodeFlow(CLIENT_ID);
-    } else {
-         getAccessToken(CLIENT_ID, code);
-        
-        
-    }
-
-}, []);
+useEffect(() => {
+  if (!code) {
+    redirectToAuthCodeFlow(CLIENT_ID);
+} 
+else {
+  getAccessToken(CLIENT_ID, code);
+}
+}, [code])
 
  
 
- async function redirectToAuthCodeFlow(clientId) {
-    const verifier = generateCodeVerifier(128);
-    const challenge = await generateCodeChallenge(verifier);
+ 
 
-    localStorage.setItem("verifier", verifier);
-
-    const params = new URLSearchParams();
-    params.append("client_id", clientId);
-    params.append("response_type", "code");
-    params.append("redirect_uri", `${REDIRECT_URI}`);
-    params.append("scope", "user-read-private user-read-email playlist-modify-public playlist-modify-private");
-    params.append("code_challenge_method", "S256");
-    params.append("code_challenge", challenge);
-
-    document.location = `https://accounts.spotify.com/authorize?${params.toString()}`;
-}
 
 function generateCodeVerifier(length) {
     let text = '';
@@ -76,6 +57,23 @@ async function generateCodeChallenge(codeVerifier) {
         .replace(/\+/g, '-')
         .replace(/\//g, '_')
         .replace(/=+$/, '');
+}
+
+async function redirectToAuthCodeFlow(clientId) {
+  const verifier = generateCodeVerifier(128);
+  const challenge = await generateCodeChallenge(verifier);
+
+  localStorage.setItem("verifier", verifier);
+
+  const params = new URLSearchParams();
+  params.append("client_id", clientId);
+  params.append("response_type", "code");
+  params.append("redirect_uri", `${REDIRECT_URI}`);
+  params.append("scope", "user-read-private user-read-email playlist-modify-public playlist-modify-private");
+  params.append("code_challenge_method", "S256");
+  params.append("code_challenge", challenge);
+
+  document.location = `https://accounts.spotify.com/authorize?${params.toString()}`;
 }
 
 
@@ -105,7 +103,8 @@ async function generateCodeChallenge(codeVerifier) {
 
   const logout = () => {
   setToken("")
-  window.localStorage.removeItem("token")
+  window.localStorage.removeItem("token");
+  code = null;
 }
 
 
@@ -203,7 +202,7 @@ const savePlaylist = useCallback(() => {
             <header className={styles.AppHeader}>
             <h1>Jammming</h1>
                 {!token ?
-                    <a className={styles.log} href={"."}>Login
+                    <a className={styles.log} href={"."} >Login
                         to Spotify</a>
                     : <button className={styles.log} onClick={logout}>Logout</button>}
                 <form className={styles.form} onSubmit={searchTracks}>

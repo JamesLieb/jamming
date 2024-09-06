@@ -1,23 +1,25 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useCallback } from "react";
 import styles from './Track.module.css';
 
 
 export default function Track(props) {
+
+    const {onAdd , track, onRemove, isRemove} = props;
     const addTrack = useCallback(
         (event) => {
-            props.onAdd(props.track);
-        },[props.onAdd, props.track]
+            onAdd(track);
+        },[onAdd, track]
         
     );
 
     const removeTrack = useCallback(
         (event) => {
-            props.onRemove(props.track);
-        }, [props.onRemove, props.track]
+            onRemove(track);
+        }, [onRemove, track]
     );
 
     const renderAddorRemove = () => {
-        if (props.isRemove) {
+        if (isRemove) {
             return (
                 <button className={styles.trackActionButton} onClick={removeTrack}>-</button>
             );

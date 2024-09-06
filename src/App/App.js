@@ -31,9 +31,15 @@ useEffect(() => {
     redirectToAuthCodeFlow(CLIENT_ID);
 } 
 else {
-  getAccessToken(CLIENT_ID, code);
+  if (token.length > 1) {
+    return
+  }
+  else {
+    getAccessToken(CLIENT_ID, code);
+  }
+  
 }
-}, [code])
+}, [code, redirectToAuthCodeFlow, getAccessToken])
 
  
 
@@ -149,7 +155,7 @@ const removeTrack = useCallback((track) => {
     let newObj  = delete listIndices.track;
     setListIndices(newObj);
     setTracks(newTracks);
-},[playlistTracks,tracks, listIndices]);
+},[tracks, listIndices]);
 
 const updatePlaylistName = useCallback((name) =>
 setPlaylistName(name), []);
@@ -194,7 +200,7 @@ const savePlaylist = useCallback(() => {
         setPlaylistName("New playlist");
         setPlaylistTracks([]);
     })
-}, [playlistName, playlistTracks]);
+}, [playlistName, playlistTracks, savePlaylistRequest]);
 
 
     return (

@@ -1,12 +1,14 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useCallback } from "react";
 import styles from './Playlist.module.css';
 import TrackList from "../Tracklist/Tracklist";
 
 export default function PlayList(props) {
 
+    const {onNameChange} = props;
+
     const handleNameChange = useCallback((event) => {
-        props.onNameChange(event.target.value);
-    }, [props.onNameChange]);
+        onNameChange(event.target.value);
+    }, [onNameChange]);
 
     return (
         <>

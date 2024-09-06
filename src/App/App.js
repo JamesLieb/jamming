@@ -139,7 +139,7 @@ const addTrack = useCallback(
       setTracks(newTracks);
       setPlaylistTracks((prevTracks) => [...prevTracks, track]);
     },
-    [playlistTracks, tracks]
+    [playlistTracks, tracks, listIndices]
   );
 
 const removeTrack = useCallback((track) => {
@@ -149,7 +149,7 @@ const removeTrack = useCallback((track) => {
     let newObj  = delete listIndices.track;
     setListIndices(newObj);
     setTracks(newTracks);
-},[tracks]);
+},[playlistTracks,tracks, listIndices]);
 
 const updatePlaylistName = useCallback((name) =>
 setPlaylistName(name), []);

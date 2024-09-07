@@ -80,7 +80,7 @@ else {
   }
   
 }
-}, [])
+}, [code, token])
 
  
 
@@ -204,7 +204,7 @@ const savePlaylist = useCallback(() => {
         setPlaylistName("New playlist");
         setPlaylistTracks([]);
     })
-}, [playlistName, playlistTracks]);
+}, [playlistName, playlistTracks, token]);
 
 
     return (

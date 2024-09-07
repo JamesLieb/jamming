@@ -27,6 +27,47 @@ function App() {
 
 
 useEffect(() => {
+  async function redirectToAuthCodeFlow(clientId) {
+    const verifier = generateCodeVerifier(128);
+    const challenge = await generateCodeChallenge(verifier);
+  
+    localStorage.setItem("verifier", verifier);
+  
+    const params = new URLSearchParams();
+    params.append("client_id", clientId);
+    params.append("response_type", "code");
+    params.append("redirect_uri", `${REDIRECT_URI}`);
+    params.append("scope", "user-read-private user-read-email playlist-modify-public playlist-modify-private");
+    params.append("code_challenge_method", "S256");
+    params.append("code_challenge", challenge);
+  
+    document.location = `https://accounts.spotify.com/authorize?${params.toString()}`;
+  };
+
+  
+ async function getAccessToken(clientId, code) {
+  const verifier = localStorage.getItem("verifier");
+
+  const params = new URLSearchParams();
+  params.append("client_id", clientId);
+  params.append("grant_type", "authorization_code");
+  params.append("code", code);
+  params.append("redirect_uri", `${REDIRECT_URI}`);
+  params.append("code_verifier", verifier);
+
+  const result = await fetch("https://accounts.spotify.com/api/token", {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: params
+  });
+
+  const { access_token } = await result.json();
+  setToken(access_token)
+  window.localStorage.setItem("token", token);
+  console.log(token);
+  return
+};
+
   if (!code) {
     redirectToAuthCodeFlow(CLIENT_ID);
 } 
@@ -39,7 +80,7 @@ else {
   }
   
 }
-}, [code, redirectToAuthCodeFlow, getAccessToken, token])
+}, [])
 
  
 
@@ -65,46 +106,9 @@ async function generateCodeChallenge(codeVerifier) {
         .replace(/=+$/, '');
 }
 
-async function redirectToAuthCodeFlow(clientId) {
-  const verifier = generateCodeVerifier(128);
-  const challenge = await generateCodeChallenge(verifier);
-
-  localStorage.setItem("verifier", verifier);
-
-  const params = new URLSearchParams();
-  params.append("client_id", clientId);
-  params.append("response_type", "code");
-  params.append("redirect_uri", `${REDIRECT_URI}`);
-  params.append("scope", "user-read-private user-read-email playlist-modify-public playlist-modify-private");
-  params.append("code_challenge_method", "S256");
-  params.append("code_challenge", challenge);
-
-  document.location = `https://accounts.spotify.com/authorize?${params.toString()}`;
-}
 
 
- async function getAccessToken(clientId, code) {
-    const verifier = localStorage.getItem("verifier");
 
-    const params = new URLSearchParams();
-    params.append("client_id", clientId);
-    params.append("grant_type", "authorization_code");
-    params.append("code", code);
-    params.append("redirect_uri", `${REDIRECT_URI}`);
-    params.append("code_verifier", verifier);
-
-    const result = await fetch("https://accounts.spotify.com/api/token", {
-        method: "POST",
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        body: params
-    });
-
-    const { access_token } = await result.json();
-    setToken(access_token)
-    window.localStorage.setItem("token", token);
-    console.log(token);
-    return
-}
   
 
   const logout = () => {
@@ -162,7 +166,11 @@ setPlaylistName(name), []);
 
 
 
-const savePlaylistRequest = async (name, trackUris) => {
+
+
+
+const savePlaylist = useCallback(() => {
+  const savePlaylistRequest = async (name, trackUris) => {
 
     if (!name || !trackUris.length) {
         return;
@@ -191,16 +199,12 @@ const savePlaylistRequest = async (name, trackUris) => {
     });
 
 };
-
-
-
-const savePlaylist = useCallback(() => {
     const trackUris = playlistTracks.map((track) => track.uri);
     savePlaylistRequest(playlistName, trackUris).then(() => {
         setPlaylistName("New playlist");
         setPlaylistTracks([]);
     })
-}, [playlistName, playlistTracks, savePlaylistRequest]);
+}, [playlistName, playlistTracks]);
 
 
     return (
